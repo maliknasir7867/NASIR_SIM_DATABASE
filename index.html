@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pak Sim Details · Nasir DB</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: "Inter", "Segoe UI", sans-serif;
+      background: linear-gradient(to right, #0f0c29, #302b63, #24243e);
+      min-height: 100vh;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      overflow-y: auto;
+      position: relative;
+      transition: background 0.3s, color 0.3s;
+    }
+    /* Light theme variables - with proper text colors for footer */
+    body.light-theme {
+      background: linear-gradient(to right, #f5f0ff, #e0e7ff, #c7d2fe);
+      color: #1e1b4b;
+    }
+    body.light-theme .glass-card, 
+    body.light-theme .box,
+    body.light-theme .dropdown-menu,
+    body.light-theme .modal-card {
+      background: rgba(255, 255, 255, 0.7);
+      border-color: rgba(0,0,0,0.1);
+      color: #1e1b4b;
+    }
+    body.light-theme input {
+      background: rgba(0,0,0,0.05);
+      color: #1e1b4b;
+    }
+    /* Light theme footer text colors - now visible */
+    body.light-theme .last-updated,
+    body.light-theme .disclaimer,
+    body.light-theme .copyright,
+    body.light-theme .input-hint {
+      color: #4a4a6a !important;  /* Darker shade for light mode */
+    }
+    body.light-theme .app-footer {
+      color: #4a4a6a;
+      border-top-color: rgba(0,0,0,0.2);
+    }
+    
+    #matrixCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      opacity: 0.2;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    /* Navigation Bar */
+    .top-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+      background: rgba(15, 12, 41, 0.7);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    body.light-theme .top-nav {
+      background: rgba(255, 255, 255, 0.7);
+    }
+
+    .home-link {
+      color: #ff416c;
+      font-weight: bold;
+      font-size: 20px;
+      text-decoration: none;
+      background: -webkit-linear-gradient(left, #ff416c, #ff4b2b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      transition: 0.3s;
+      letter-spacing: 1px;
+    }
+
+    .home-link:hover {
+      transform: scale(1.05);
+      text-shadow: 0 0 10px #ff416c;
+    }
+
+    /* Hamburger Menu */
+    .hamburger-menu {
+      position: relative;
+      z-index: 101;
+    }
+
+    .hamburger-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    .hamburger-icon:hover {
+      border-color: #ff416c;
+      box-shadow: 0 0 20px #ff416c;
+      transform: scale(1.05);
+    }
+
+    .hamburger-icon span {
+      width: 20px;
+      height: 2px;
+      background: #fff;
+      border-radius: 4px;
+      transition: 0.3s ease;
+    }
+    body.light-theme .hamburger-icon span {
+      background: #1e1b4b;
+    }
+
+    .hamburger-icon.active span:nth-child(1) {
+      transform: rotate(45deg) translate(6px, 6px);
+    }
+
+    .hamburger-icon.active span:nth-child(2) {
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+
+    .hamburger-icon.active span:nth-child(3) {
+      transform: rotate(-45deg) translate(6px, -6px);
+    }
+
+    /* Dropdown Menu */
+    .dropdown-menu {
+      position: absolute;
+      top: 50px;
+      right: 0;
+      width: 260px;
+      background: rgba(20, 20, 40, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 14px;
+      padding: 10px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: 0.3s ease;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .dropdown-menu.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .menu-item {
+      padding: 12px 15px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s ease;
+      color: rgba(255,255,255,0.8);
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .menu-item:hover {
+      background: rgba(255,65,108,0.2);
+      color: #ff416c;
+      transform: translateX(5px);
+    }
+
+    .menu-item svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    /* Submenu for theme/language/sound/particle */
+    .submenu {
+      padding-left: 25px;
+      margin-top: -5px;
+      margin-bottom: 5px;
+    }
+    .submenu-item {
+      padding: 8px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      color: rgba(255,255,255,0.7);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .submenu-item:hover {
+      background: rgba(255,65,108,0.15);
+      color: #ff416c;
+    }
+    .submenu-item.active {
+      color: #ff416c;
+      background: rgba(255,65,108,0.1);
+    }
+    .slider {
+      margin-left: auto;
+      width: 36px;
+      height: 18px;
+      background: #555;
+      border-radius: 18px;
+      position: relative;
+    }
+    .slider::after {
+      content: '';
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background: white;
+      border-radius: 50%;
+      top: 2px;
+      right: 2px;
+      transition: 0.2s;
+    }
+    .slider.active::after {
+      right: 20px;
+    }
+
+    /* Owner Info Modal - FIXED: scrollable and cancel button visible */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      opacity: 0;
+      visibility: hidden;
+      transition: 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-card {
+      width: 90%;
+      max-width: 500px;
+      max-height: 80vh; /* Limit height and enable scrolling */
+      background: rgba(30, 30, 50, 0.95);
+      backdrop-filter: blur(30px);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 30px;
+      padding: 40px;
+      position: relative;
+      transform: scale(0.9);
+      transition: 0.3s ease;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      overflow-y: auto; /* Make content scrollable */
+    }
+
+    .modal-overlay.active .modal-card {
+      transform: scale(1);
+    }
+
+    .modal-close {
+      position: sticky; /* Keep close button accessible */
+      top: 0;
+      float: right;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: 0.3s ease;
+      font-size: 18px;
+      z-index: 10001;
+      margin-bottom: 10px;
+    }
+
+    .modal-close:hover {
+      background: #ff416c;
+      color: white;
+      transform: rotate(90deg);
+    }
+
+    .modal-title {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 25px;
+      background: linear-gradient(90deg, #00f5ff, #ff00c8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      clear: both;
+    }
+
+    .owner-info {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .info-row {
+      display: flex;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      padding-bottom: 10px;
+    }
+
+    .info-label {
+      width: 120px;
+      font-weight: 600;
+      color: #00f5ff;
+    }
+
+    .info-value {
+      flex: 1;
+      color: #fff;
+    }
+
+    .info-value a {
+      color: #25D366;
+      text-decoration: none;
+      font-weight: 600;
+      transition: 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .info-value a:hover {
+      color: #ff00c8;
+      transform: scale(1.05);
+    }
+
+    .info-value a svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    .profession-list {
+      list-style: none;
+      margin-top: 5px;
+    }
+
+    .profession-list li {
+      margin-bottom: 5px;
+      color: rgba(255,255,255,0.8);
+      position: relative;
+      padding-left: 20px;
+    }
+
+    .profession-list li::before {
+      content: "•";
+      color: #ff00c8;
+      position: absolute;
+      left: 0;
+      font-size: 20px;
+    }
+
+    .whatsapp-number {
+      background: rgba(37, 211, 102, 0.1);
+      border-radius: 30px;
+      padding: 5px 12px;
+      display: inline-block;
+      border: 1px solid rgba(37, 211, 102, 0.3);
+    }
+
+    /* Main box */
+    .box {
+      position: relative;
+      z-index: 1;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 35px 25px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      text-align: center;
+      margin-top: 70px;
+    }
+    .box h2 {
+      font-size: 26px;
+      margin-bottom: 15px;
+      color: #ff416c;
+      background: -webkit-linear-gradient(left, #ff416c, #ff4b2b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Search history pills */
+    .history-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 15px 0;
+      justify-content: center;
+    }
+    .history-pill {
+      background: rgba(255,65,108,0.2);
+      border: 1px solid rgba(255,65,108,0.3);
+      border-radius: 30px;
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .history-pill:hover {
+      background: rgba(255,65,108,0.4);
+      transform: scale(1.05);
+    }
+    .history-pill .remove-history {
+      color: #ff9999;
+      font-weight: bold;
+    }
+
+    /* Input container with clear button - FIXED: cross at right edge */
+    .input-container {
+      position: relative;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    .input-container input {
+      width: 100%;
+      padding: 14px 40px 14px 14px; /* right padding leaves space for cross */
+      border-radius: 10px;
+      border: none;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 16px;
+      outline: none;
+      line-height: 1;
+    }
+    body.light-theme .input-container input {
+      background: rgba(0,0,0,0.05);
+      color: #1e1b4b;
+    }
+    .input-container .clear-input {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.5);
+      font-size: 18px;
+      cursor: pointer;
+      display: none;
+      padding: 0;
+      width: 20px;
+      height: 20px;
+      line-height: 1;
+      margin: 0;
+      z-index: 5;
+    }
+    .input-container .clear-input:hover {
+      color: #ff416c;
+    }
+    .input-container input:not(:placeholder-shown) + .clear-input,
+    .input-container input:focus + .clear-input {
+      display: block;
+    }
+
+    /* Input hint */
+    .input-hint {
+      text-align: left;
+      color: rgba(255,255,255,0.5);
+      font-size: 12px;
+      margin: 5px 0 15px 5px;
+    }
+
+    .box button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #fff;
+      transition: all 0.3s ease-in-out;
+    }
+    .box button:hover {
+      transform: scale(1.05);
+    }
+    .primary-btn {
+      background: linear-gradient(90deg, #ff416c, #ff4b2b);
+      box-shadow: 0 0 10px #ff416c;
+    }
+    .primary-btn.loading {
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 10px #ff416c; }
+      50% { box-shadow: 0 0 25px #ff416c, 0 0 15px #ff4b2b; transform: scale(1.02); }
+      100% { box-shadow: 0 0 10px #ff416c; }
+    }
+
+    .whatsapp-btn {
+      background: linear-gradient(90deg, #25D366, #128C7E);
+      box-shadow: 0 0 10px #25D366;
+    }
+    .telegram-btn {
+      background: linear-gradient(90deg, #0088cc, #005577);
+      box-shadow: 0 0 10px #0088cc;
+    }
+    .copy-btn {
+      background: linear-gradient(90deg, #666, #444);
+      box-shadow: 0 0 10px #777;
+    }
+    #responseBox {
+      display: none;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 20px;
+      margin-top: 20px;
+      border-radius: 10px;
+      text-align: left;
+      white-space: pre-line;
+      font-size: 15px;
+      box-shadow: inset 0 0 10px rgba(255,255,255,0.2);
+      animation: fadeIn 1s ease-in-out;
+      max-height: 300px;
+      overflow-y: auto;
+      border-left: 3px solid #ff416c;
+    }
+    .success-badge {
+      display: inline-block;
+      background: rgba(0,255,0,0.1);
+      color: #0f0;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+    a {
+      color: #00bfff;
+      text-decoration: none;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Footer - without Best Copy */
+    .app-footer {
+      margin-top: 25px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+      text-align: center;
+      border-top: 1px solid rgba(255,255,255,0.15);
+      padding-top: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .footer-main {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    .copyright {
+      font-weight: 600;
+      background: linear-gradient(90deg, #ff416c, #ff4b2b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 0.5px;
+    }
+    .disclaimer {
+      color: rgba(255,255,255,0.4);
+      font-style: italic;
+      font-size: 11px;
+    }
+    .last-updated {
+      font-size: 10px;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 5px;
+    }
+
+    #popupOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    #popupOverlay div {
+      background: #1c1c1c;
+      padding: 30px 20px;
+      border-radius: 15px;
+      text-align: center;
+      max-width: 300px;
+      box-shadow: 0 0 20px rgba(0,255,255,0.2);
+    }
+    #popupOverlay h3 {
+      color: #fff;
+      margin-bottom: 20px;
+    }
+    #popupOverlay button {
+      margin: 10px;
+      padding: 10px 20px;
+      border: none;
+      color: white;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #popupOverlay .join-btn { background: #0088cc; }
+    #popupOverlay .cancel-btn { background: #555; }
+
+    /* Particle controls */
+    .particle-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 10px;
+    }
+    .particle-control input {
+      width: 60px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      padding: 4px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="matrixCanvas"></canvas>
+
+  <!-- Navigation -->
+  <div class="top-nav">
+    <a href="#" class="home-link" onclick="scrollToTop(event)">🏠 Welcome to Nasir DB</a>
+    
+    <div class="hamburger-menu">
+      <div class="hamburger-icon" id="hamburgerIcon">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="dropdown-menu" id="dropdownMenu">
+        <!-- Owner Info -->
+        <div class="menu-item" id="ownerInfoMenuItem">
+          <svg viewBox="0 0 24 24" width="18" height="18">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" fill="none" stroke-width="2"/>
+            <circle cx="12" cy="7" r="4" stroke="currentColor" fill="none" stroke-width="2"/>
+          </svg>
+          <span>Owner Info</span>
+        </div>
+        
+        <!-- Feature 1: Theme Switcher -->
+        <div class="menu-item" style="cursor:default; justify-content:space-between">
+          <span>🌓 Theme</span>
+          <span class="slider" id="themeSlider" onclick="toggleTheme()"></span>
+        </div>
+        
+        <!-- Feature 6: Language Switcher -->
+        <div class="menu-item" style="cursor:default; justify-content:space-between">
+          <span>🔤 Language</span>
+          <span style="display:flex; gap:5px">
+            <span class="submenu-item active" id="langEn" onclick="setLanguage('en')" style="padding:2px 8px">EN</span>
+            <span class="submenu-item" id="langUr" onclick="setLanguage('ur')" style="padding:2px 8px">اردو</span>
+          </span>
+        </div>
+        
+        <!-- Feature 8: Sound Effects -->
+        <div class="menu-item" style="cursor:default; justify-content:space-between">
+          <span>🔊 Sound</span>
+          <span class="slider active" id="soundSlider" onclick="toggleSound()"></span>
+        </div>
+        
+        <!-- Feature 10: Particle Customizer -->
+        <div class="menu-item" style="cursor:default; flex-wrap:wrap">
+          <div style="width:100%; margin-bottom:5px">✨ Particles</div>
+          <div class="particle-control">
+            <span>Color</span>
+            <input type="color" id="particleColor" value="#00ff99" onchange="updateParticles()">
+          </div>
+          <div class="particle-control">
+            <span>Speed</span>
+            <input type="range" id="particleSpeed" min="0.1" max="1.5" step="0.1" value="0.5" onchange="updateParticles()">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Owner Info Modal - FIXED: scrollable, close button always visible -->
+  <div class="modal-overlay" id="ownerModal">
+    <div class="modal-card">
+      <div class="modal-close" id="closeModal">✕</div>
+      <h2 class="modal-title">Owner Information</h2>
+      <div class="owner-info">
+        <div class="info-row"><div class="info-label">👤 Name:</div><div class="info-value">Nasir Hacker</div></div>
+        <div class="info-row">
+          <div class="info-label">💼 Profession:</div>
+          <div class="info-value">
+            <ul class="profession-list">
+              <li>Cybersecurity Expert</li>
+              <li>Ethical Hacker</li>
+              <li>Automation Developer</li>
+              <li>Bot Developer (Telegram, WhatsApp)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">📱 WhatsApp:</div>
+          <div class="info-value">
+            <a href="https://wa.me/923057175014?text=👋%20Hi%20Nasir!%20I%20saw%20your%20Nasir%20DB%20tool..." target="_blank" class="whatsapp-number">
+              <svg viewBox="0 0 24 24" width="16" height="16">
+                <path d="M19.077 4.928C17.191 3.041 14.683 2 12.006 2 6.798 2 2.548 6.193 2.54 11.393c-.003 1.747.456 3.457 1.328 4.985L2.25 21.75l5.433-1.566c1.494.832 3.175 1.274 4.902 1.276h.004c5.192 0 9.444-4.194 9.452-9.394.004-2.512-1.01-4.872-2.914-6.758zM12.025 20.031h-.003c-1.488 0-2.944-.403-4.211-1.159l-.302-.18-3.227.93.992-3.146-.174-.31a8.416 8.416 0 0 1-1.288-4.468c.008-4.656 3.794-8.438 8.46-8.438 2.256 0 4.377.88 5.973 2.478 1.592 1.594 2.467 3.713 2.463 5.966-.008 4.656-3.795 8.437-8.463 8.437zM16.293 14.1c-.242-.121-1.432-.706-1.654-.787-.222-.08-.383-.121-.544.121-.161.242-.625.787-.766.948-.141.161-.282.181-.524.06-.868-.404-1.584-1.113-2.165-1.92-.163-.242-.017-.373.115-.578.094-.145.213-.316.284-.476.081-.16.041-.302-.02-.424-.061-.121-.544-1.311-.746-1.796-.196-.472-.396-.404-.544-.414-.142-.01-.302-.01-.462-.01s-.423.06-.644.302c-.221.242-.847.827-.847 2.018 0 1.19.867 2.341.989 2.502.121.161 1.673 2.663 4.134 3.631.576.222 1.032.358 1.386.46.586.168 1.12.144 1.543.088.473-.064 1.456-.595 1.662-1.17.206-.575.206-1.069.144-1.17-.061-.101-.222-.161-.464-.283z"/>
+              </svg>
+              +92 305 7175014
+            </a>
+          </div>
+        </div>
+        <div class="info-row"><div class="info-label">🎂 Age:</div><div class="info-value">20 Years</div></div>
+        <div class="info-row"><div class="info-label">📍 City:</div><div class="info-value">Bhakkar, Punjab, Pakistan</div></div>
+        <div class="info-row"><div class="info-label">📚 Education:</div><div class="info-value">Student of BSCS</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Box -->
+  <div class="box">
+    <h2>NASIR HACKER DB</h2>
+    
+    <!-- Feature 2: Search History -->
+    <div class="history-container" id="historyContainer"></div>
+    
+    <!-- Input with clear button - FIXED: cross at right edge -->
+    <div class="input-container">
+      <input type="text" id="number" placeholder="Enter phone or CNIC" autocomplete="off">
+      <button class="clear-input" id="clearInputBtn" onclick="clearInput()">✕</button>
+    </div>
+    <!-- Input hint -->
+    <div class="input-hint" id="inputHint">📱 Example: 3057175014 or 1234512345678</div>
+
+    <button class="primary-btn" id="fetchBtn" onclick="fetchData()">🔎 Get Details</button>
+    <div id="responseBox"></div>
+    <div style="display: flex; gap: 10px; margin-top: 10px;">
+      <button id="shareButton" class="whatsapp-btn" onclick="shareWhatsApp()" style="display: none; flex:1;">📲 Share</button>
+      <button id="copyButton" class="copy-btn" onclick="copyToClipboard()" style="display: none; flex:1;">📋 Copy</button>
+    </div>
+    <button class="telegram-btn" onclick="window.open('https://t.me/TrustedHacker079', '_blank')">✈️ Join Telegram Channel</button>
+    
+    <!-- Last updated & footer (Best Copy removed) -->
+    <div class="last-updated" id="lastUpdated"></div>
+    <div class="app-footer">
+      <div class="footer-main">
+        <span class="copyright">© 2026 Nasir Hacker</span>
+      </div>
+      <span class="disclaimer" id="disclaimer">📌 Data for educational purposes only. Respect privacy.</span>
+    </div>
+  </div>
+
+  <!-- Telegram Popup -->
+  <div id="popupOverlay">
+    <div>
+      <h3>Join our Telegram Channel?</h3>
+      <button class="join-btn" onclick="joinTelegram()">Join Telegram</button>
+      <button class="cancel-btn" onclick="closePopup()">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    // ========== GLOBAL VARIABLES ==========
+    let fetchingInterval = null;
+    let lastRawData = "";
+    let soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+    let currentLanguage = localStorage.getItem('language') || 'en';
+    let particleSpeed = 0.5;
+    let particleColor = '#00ff99';
+    
+    // ========== MATRIX CANVAS ==========
+    const canvas = document.getElementById("matrixCanvas");
+    const ctx = canvas.getContext("2d");
+    let width, height, particles = [], particleCount = 60;
+    
+    function initParticles() {
+      particles = [];
+      for (let i = 0; i < particleCount; i++) {
+        particles.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          r: Math.random() * 2 + 1,
+          vx: (Math.random() - 0.5) * particleSpeed,
+          vy: (Math.random() - 0.5) * particleSpeed
+        });
+      }
+    }
+    
+    function resizeCanvas() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      initParticles();
+    }
+    
+    function drawParticles() {
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = particleColor;
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0 || p.x > width) p.vx *= -1;
+        if (p.y < 0 || p.y > height) p.vy *= -1;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      requestAnimationFrame(drawParticles);
+    }
+    
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+    drawParticles();
+    
+    function updateParticles() {
+      particleColor = document.getElementById('particleColor').value;
+      particleSpeed = parseFloat(document.getElementById('particleSpeed').value);
+      particles.forEach(p => {
+        p.vx = (Math.random() - 0.5) * particleSpeed;
+        p.vy = (Math.random() - 0.5) * particleSpeed;
+      });
+    }
+    
+    // ========== LANGUAGE STRINGS ==========
+    const lang = {
+      en: {
+        home: "🏠 Welcome to Nasir DB",
+        hint: "📱 Example: 3057175014 or 1234512345678",
+        disclaimer: "📌 Data for educational purposes only. Respect privacy.",
+        fetch: "🔎 Get Details",
+        share: "📲 Share",
+        copy: "📋 Copy",
+        telegram: "✈️ Join Telegram Channel",
+        invalid: "❌ Invalid format! Use 10-digit mobile or 13-digit CNIC.",
+        noInput: "⚠️ Please enter a phone number or CNIC.",
+        noRecords: "❌ No records found.",
+        error: "Error fetching data.",
+        copied: "✅ Data copied!",
+        soundOn: "🔊 Sound On",
+        soundOff: "🔇 Sound Off"
+      },
+      ur: {
+        home: "🏠 ناصر ڈی بی میں خوش آمدید",
+        hint: "📱 مثال: 3057175014 یا 1234512345678",
+        disclaimer: "📌 ڈیٹا صرف تعلیمی مقاصد کے لیے۔ پرائیویسی کا احترام کریں۔",
+        fetch: "🔎 تفصیلات حاصل کریں",
+        share: "📲 شیئر کریں",
+        copy: "📋 کاپی کریں",
+        telegram: "✈️ ٹیلیگرام چینل جوائن کریں",
+        invalid: "❌ غلط فارمیٹ! 10 ہندسوں کا موبائل یا 13 ہندسوں کا CNIC درج کریں۔",
+        noInput: "⚠️ براہ کرم فون نمبر یا CNIC درج کریں۔",
+        noRecords: "❌ کوئی ریکارڈ نہیں ملا۔",
+        error: "ڈیٹا حاصل کرنے میں خرابی۔",
+        copied: "✅ ڈیٹا کاپی ہو گیا!",
+        soundOn: "🔊 آواز آن",
+        soundOff: "🔇 آواز آف"
+      }
+    };
+    
+    function applyLanguage() {
+      document.querySelector('.home-link').innerText = lang[currentLanguage].home;
+      document.getElementById('inputHint').innerText = lang[currentLanguage].hint;
+      document.getElementById('disclaimer').innerText = lang[currentLanguage].disclaimer;
+      document.getElementById('fetchBtn').innerText = lang[currentLanguage].fetch;
+      document.getElementById('shareButton').innerText = lang[currentLanguage].share;
+      document.getElementById('copyButton').innerText = lang[currentLanguage].copy;
+      document.querySelector('.telegram-btn').innerText = lang[currentLanguage].telegram;
+      // Update active class
+      document.getElementById('langEn').classList.toggle('active', currentLanguage === 'en');
+      document.getElementById('langUr').classList.toggle('active', currentLanguage === 'ur');
+      localStorage.setItem('language', currentLanguage);
+    }
+    
+    function setLanguage(lang) {
+      currentLanguage = lang;
+      applyLanguage();
+    }
+    
+    // ========== THEME TOGGLE ==========
+    function toggleTheme() {
+      document.body.classList.toggle('light-theme');
+      const slider = document.getElementById('themeSlider');
+      slider.classList.toggle('active', !document.body.classList.contains('light-theme'));
+    }
+    
+    // ========== SOUND TOGGLE ==========
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      localStorage.setItem('soundEnabled', soundEnabled);
+      document.getElementById('soundSlider').classList.toggle('active', soundEnabled);
+      if (soundEnabled) playSound('click');
+    }
+    
+    function playSound(type) {
+      if (!soundEnabled) return;
+      // Simple beep using Web Audio API
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.frequency.value = type === 'success' ? 800 : 400;
+        gainNode.gain.value = 0.1;
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.1);
+      } catch (e) {}
+    }
+    
+    // ========== SCROLL TO TOP ==========
+    function scrollToTop(e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ========== CLEAR INPUT ==========
+    function clearInput() {
+      document.getElementById("number").value = "";
+      document.getElementById("clearInputBtn").style.display = "none";
+      document.getElementById("responseBox").style.display = "none";
+    }
+
+    // Show clear button when typing
+    document.getElementById("number").addEventListener("input", function(e) {
+      const clearBtn = document.getElementById("clearInputBtn");
+      clearBtn.style.display = e.target.value ? "block" : "none";
+    });
+
+    // ========== HAMBURGER & MODAL ==========
+    const hamburgerIcon = document.getElementById('hamburgerIcon');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    hamburgerIcon.addEventListener('click', (e) => {
+      e.stopPropagation();
+      hamburgerIcon.classList.toggle('active');
+      dropdownMenu.classList.toggle('active');
+    });
+    document.addEventListener('click', (e) => {
+      if (!hamburgerIcon.contains(e.target) && !dropdownMenu.contains(e.target)) {
+        hamburgerIcon.classList.remove('active');
+        dropdownMenu.classList.remove('active');
+      }
+    });
+
+    const ownerModal = document.getElementById('ownerModal');
+    const ownerInfoMenuItem = document.getElementById('ownerInfoMenuItem');
+    const closeModal = document.getElementById('closeModal');
+    function openModal() { ownerModal.classList.add('active'); hamburgerIcon.classList.remove('active'); dropdownMenu.classList.remove('active'); }
+    function closeModalFunc() { ownerModal.classList.remove('active'); }
+    ownerInfoMenuItem.addEventListener('click', openModal);
+    closeModal.addEventListener('click', closeModalFunc);
+    ownerModal.addEventListener('click', (e) => { if (e.target === ownerModal) closeModalFunc(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && ownerModal.classList.contains('active')) closeModalFunc(); });
+
+    // ========== LAST UPDATED ==========
+    document.getElementById('lastUpdated').innerText = `🔄 Last sync: ${new Date().toLocaleString('en-PK', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' })} PKT`;
+
+    // ========== SEARCH HISTORY (Feature 2) ==========
+    let searchHistory = JSON.parse(localStorage.getItem('searchHistory')) || [];
+    
+    function renderHistory() {
+      const container = document.getElementById('historyContainer');
+      container.innerHTML = '';
+      searchHistory.slice(-5).reverse().forEach(num => {
+        const pill = document.createElement('span');
+        pill.className = 'history-pill';
+        pill.innerHTML = `${num} <span class="remove-history" onclick="removeFromHistory('${num}'); event.stopPropagation()">✕</span>`;
+        pill.onclick = () => {
+          document.getElementById('number').value = num;
+          fetchData();
+        };
+        container.appendChild(pill);
+      });
+    }
+    
+    function addToHistory(num) {
+      if (!num) return;
+      searchHistory = searchHistory.filter(n => n !== num);
+      searchHistory.push(num);
+      if (searchHistory.length > 10) searchHistory.shift();
+      localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
+      renderHistory();
+    }
+    
+    function removeFromHistory(num) {
+      searchHistory = searchHistory.filter(n => n !== num);
+      localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
+      renderHistory();
+    }
+    
+    renderHistory();
+
+    // ========== FETCHING ANIMATION ==========
+    function startFetchingAnimation() {
+      const responseBox = document.getElementById("responseBox");
+      let dotCount = 1;
+      if (fetchingInterval) clearInterval(fetchingInterval);
+      responseBox.innerHTML = "<p style='color: #FFD700; font-weight: bold;'>⌛ Fetching.</p>";
+      responseBox.style.display = "block";
+      document.getElementById('fetchBtn').classList.add('loading');
+      playSound('fetch');
+      fetchingInterval = setInterval(() => {
+        dotCount = (dotCount % 3) + 1;
+        responseBox.innerHTML = `<p style='color: #FFD700; font-weight: bold;'>⌛ Fetching${".".repeat(dotCount)}</p>`;
+      }, 400);
+    }
+    
+    function stopFetchingAnimation() {
+      if (fetchingInterval) { clearInterval(fetchingInterval); fetchingInterval = null; }
+      document.getElementById('fetchBtn').classList.remove('loading');
+    }
+
+    function scrollToResults() {
+      document.getElementById('responseBox').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // ========== MAIN FETCH FUNCTION ==========
+    window.fetchData = async function() {
+      const number = document.getElementById("number").value.trim();
+      const responseBox = document.getElementById("responseBox");
+      const shareButton = document.getElementById("shareButton");
+      const copyButton = document.getElementById("copyButton");
+
+      responseBox.style.display = "block";
+      shareButton.style.display = "none";
+      copyButton.style.display = "none";
+
+      if (!number) {
+        responseBox.innerHTML = `<p style='color: #FFD700; font-weight: bold;'>${lang[currentLanguage].noInput}</p>`;
+        return;
+      }
+
+      startFetchingAnimation();
+
+      let searchedNumber = null, searchedCNIC = null;
+      if (/^\d{13}$/.test(number)) searchedCNIC = number;
+      else if (/^[3]\d{9}$/.test(number)) searchedNumber = number;
+      else {
+        const match = number.match(/[3]\d{9}/);
+        if (match) searchedNumber = match[0];
+      }
+
+      if (!searchedNumber && !searchedCNIC) {
+        stopFetchingAnimation();
+        responseBox.innerHTML = `<p style="color: #FFD700; font-size: 16px; font-weight: bold;">${lang[currentLanguage].invalid}<br><br>Input: "${number}"</p>`;
+        return;
+      }
+
+      // Add to history
+      addToHistory(searchedNumber || searchedCNIC);
+
+      // Check restricted numbers
+      const restrictedNumbers = ["3206939553", "3057175014", "3446823272"];
+      if (searchedNumber && restrictedNumbers.includes(searchedNumber)) {
+        stopFetchingAnimation();
+        const msg = `🔒 **RESTRICTED**\n\n📱 Number: ${searchedNumber}\n👤 Owner: Nasir Hacker\n\n💬 Use WhatsApp to chat!`;
+        lastRawData = msg;
+        responseBox.innerHTML = `<p style="color: #FFD700; font-size: 16px; font-weight: bold; white-space: pre-line;">${msg}</p>`;
+        scrollToResults();
+        playSound('success');
+        return;
+      }
+
+      const queryParam = searchedNumber || searchedCNIC;
+      const apiUrl = `https://fam-official.serv00.net/api/database.php?number=${encodeURIComponent(queryParam)}`;
+      
+      try {
+        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(apiUrl)}`;
+        const res = await fetch(proxyUrl);
+        const text = await res.text();
+        if (text.trim().startsWith('<')) throw new Error('Server returned HTML');
+        let data;
+        try { data = JSON.parse(text); } catch (e) {
+          if (text.includes("Too Many Requests")) {
+            const fallbackProxy = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(apiUrl)}`;
+            const fallbackRes = await fetch(fallbackProxy);
+            const fallbackText = await fallbackRes.text();
+            if (fallbackText.trim().startsWith('<')) throw new Error('Proxy error');
+            data = JSON.parse(fallbackText);
+          } else throw new Error('Invalid JSON');
+        }
+        stopFetchingAnimation();
+
+        if (data && data.success === true && data.data && Array.isArray(data.data.records)) {
+          const records = data.data.records;
+          if (records.length === 0) {
+            responseBox.innerHTML = `<p style="color: #FFD700; font-size: 16px; font-weight: bold;">${lang[currentLanguage].noRecords}</p>`;
+            return;
+          }
+          
+          const checkedTime = new Date().toLocaleString('en-PK', { hour: '2-digit', minute: '2-digit', second: '2-digit', day: '2-digit', month: 'short' }) + ' PKT';
+          const uniqueRecords = records.filter((rec, idx, self) => idx === self.findIndex(r => r.phone === rec.phone && r.cnic === rec.cnic));
+
+          let content = `🔍 SIM DATA FOUND\n📊 Total Records: ${uniqueRecords.length}\n\n`;
+          uniqueRecords.forEach((rec, index) => {
+            const name = (rec.full_name && rec.full_name !== "None" && rec.full_name !== "null") ? rec.full_name : "N/A";
+            const address = (rec.address && rec.address !== "None" && rec.address !== "null" && rec.address !== "") ? rec.address : "Not Available";
+            if (uniqueRecords.length > 1) content += `Record ${index + 1} of ${uniqueRecords.length}\n`;
+            content += `👤 Name: ${name}\n🆔 CNIC: ${rec.cnic || "N/A"}\n📞 Mobile: ${rec.phone || "N/A"}\n`;
+            if (index < uniqueRecords.length - 1) content += `─────────────────\n\n`;
+          });
+          content += `\n📅 Checked: ${checkedTime}\n🚀 POWERED BY NASIR HACKER`;
+          
+          lastRawData = content;
+          responseBox.innerHTML = content + `\n<span class="success-badge">✅ Loaded</span>`;
+          
+          shareButton.style.display = "inline-block";
+          copyButton.style.display = "inline-block";
+          scrollToResults();
+          playSound('success');
+        } else {
+          responseBox.innerHTML = `<p style="color: #FFD700; font-size: 16px; font-weight: bold;">${lang[currentLanguage].noRecords}<br><br>Contact: <a href="https://t.me/Trustedhacker78" target="_blank">NASIR-MAIBAL</a></p>`;
+        }
+      } catch (error) {
+        stopFetchingAnimation();
+        responseBox.innerHTML = `<p style="color: red; font-size: 16px; font-weight: bold;">${lang[currentLanguage].error}<br><small>${error.message}</small></p>`;
+      }
+    };
+
+    function joinTelegram() { window.open("https://t.me/trustedhacker079", "_blank"); closePopup(); }
+    function closePopup() { document.getElementById("popupOverlay").style.display = "none"; }
+    function shareWhatsApp() {
+      const text = document.getElementById("responseBox").innerText;
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
+    }
+    function copyToClipboard() {
+      if (lastRawData) {
+        navigator.clipboard.writeText(lastRawData).then(() => alert(lang[currentLanguage].copied));
+      } else {
+        let raw = document.getElementById("responseBox").innerText.replace(/\n*✅ Loaded\s*$/, '');
+        navigator.clipboard.writeText(raw).then(() => alert(lang[currentLanguage].copied));
+      }
+    }
+    
+    // Initialize
+    applyLanguage();
+    document.getElementById('soundSlider').classList.toggle('active', soundEnabled);
+    setTimeout(() => { document.getElementById("popupOverlay").style.display = "flex"; }, 10000);
+  </script>
+</body>
+</html>
