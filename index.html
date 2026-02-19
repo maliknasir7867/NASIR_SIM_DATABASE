@@ -1,10 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pak Sim Details · Nasir DB</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<!doctype html>
+<html lang="en"> 
+ <head> 
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <title>Pak Sim Details · Nasir DB</title> 
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"> 
   <style>
     * { box-sizing: border-box; }
     body {
@@ -663,144 +663,126 @@
       padding: 4px;
       border-radius: 4px;
     }
-  </style>
-</head>
-<body>
-  <canvas id="matrixCanvas"></canvas>
-
-  <!-- Navigation -->
-  <div class="top-nav">
-    <a href="#" class="home-link" onclick="scrollToTop(event)">🏠 Welcome to Nasir DB</a>
-    
-    <div class="hamburger-menu">
-      <div class="hamburger-icon" id="hamburgerIcon">
-        <span></span><span></span><span></span>
+  </style> 
+ </head> 
+ <body> 
+  <canvas id="matrixCanvas"></canvas> <!-- Navigation --> 
+  <div class="top-nav"> <a href="#" class="home-link" onclick="scrollToTop(event)">🏠 Welcome to Nasir DB</a> 
+   <div class="hamburger-menu"> 
+    <div class="hamburger-icon" id="hamburgerIcon"> <span></span><span></span><span></span> 
+    </div> 
+    <div class="dropdown-menu" id="dropdownMenu"> <!-- Owner Info --> 
+     <div class="menu-item" id="ownerInfoMenuItem"> 
+      <svg viewbox="0 0 24 24" width="18" height="18"> <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" fill="none" stroke-width="2" /> <circle cx="12" cy="7" r="4" stroke="currentColor" fill="none" stroke-width="2" /> 
+      </svg> <span>Owner Info</span> 
+     </div> <!-- Feature 1: Theme Switcher --> 
+     <div class="menu-item" style="cursor:default; justify-content:space-between"> <span>🌓 Theme</span> <span class="slider" id="themeSlider" onclick="toggleTheme()"></span> 
+     </div> <!-- Feature 6: Language Switcher --> 
+     <div class="menu-item" style="cursor:default; justify-content:space-between"> <span>🔤 Language</span> <span style="display:flex; gap:5px"> <span class="submenu-item active" id="langEn" onclick="setLanguage('en')" style="padding:2px 8px">EN</span> <span class="submenu-item" id="langUr" onclick="setLanguage('ur')" style="padding:2px 8px">اردو</span> </span> 
+     </div> <!-- Feature 8: Sound Effects --> 
+     <div class="menu-item" style="cursor:default; justify-content:space-between"> <span>🔊 Sound</span> <span class="slider active" id="soundSlider" onclick="toggleSound()"></span> 
+     </div> <!-- Feature 10: Particle Customizer --> 
+     <div class="menu-item" style="cursor:default; flex-wrap:wrap"> 
+      <div style="width:100%; margin-bottom:5px">
+       ✨ Particles
+      </div> 
+      <div class="particle-control"> <span>Color</span> 
+       <input type="color" id="particleColor" value="#00ff99" onchange="updateParticles()"> 
+      </div> 
+      <div class="particle-control"> <span>Speed</span> 
+       <input type="range" id="particleSpeed" min="0.1" max="1.5" step="0.1" value="0.5" onchange="updateParticles()"> 
+      </div> 
+     </div> 
+    </div> 
+   </div> 
+  </div> <!-- Owner Info Modal - FIXED: scrollable, close button always visible --> 
+  <div class="modal-overlay" id="ownerModal"> 
+   <div class="modal-card"> 
+    <div class="modal-close" id="closeModal">
+     ✕
+    </div> 
+    <h2 class="modal-title">Owner Information</h2> 
+    <div class="owner-info"> 
+     <div class="info-row">
+      <div class="info-label">
+       👤 Name:
       </div>
-      <div class="dropdown-menu" id="dropdownMenu">
-        <!-- Owner Info -->
-        <div class="menu-item" id="ownerInfoMenuItem">
-          <svg viewBox="0 0 24 24" width="18" height="18">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" fill="none" stroke-width="2"/>
-            <circle cx="12" cy="7" r="4" stroke="currentColor" fill="none" stroke-width="2"/>
-          </svg>
-          <span>Owner Info</span>
-        </div>
-        
-        <!-- Feature 1: Theme Switcher -->
-        <div class="menu-item" style="cursor:default; justify-content:space-between">
-          <span>🌓 Theme</span>
-          <span class="slider" id="themeSlider" onclick="toggleTheme()"></span>
-        </div>
-        
-        <!-- Feature 6: Language Switcher -->
-        <div class="menu-item" style="cursor:default; justify-content:space-between">
-          <span>🔤 Language</span>
-          <span style="display:flex; gap:5px">
-            <span class="submenu-item active" id="langEn" onclick="setLanguage('en')" style="padding:2px 8px">EN</span>
-            <span class="submenu-item" id="langUr" onclick="setLanguage('ur')" style="padding:2px 8px">اردو</span>
-          </span>
-        </div>
-        
-        <!-- Feature 8: Sound Effects -->
-        <div class="menu-item" style="cursor:default; justify-content:space-between">
-          <span>🔊 Sound</span>
-          <span class="slider active" id="soundSlider" onclick="toggleSound()"></span>
-        </div>
-        
-        <!-- Feature 10: Particle Customizer -->
-        <div class="menu-item" style="cursor:default; flex-wrap:wrap">
-          <div style="width:100%; margin-bottom:5px">✨ Particles</div>
-          <div class="particle-control">
-            <span>Color</span>
-            <input type="color" id="particleColor" value="#00ff99" onchange="updateParticles()">
-          </div>
-          <div class="particle-control">
-            <span>Speed</span>
-            <input type="range" id="particleSpeed" min="0.1" max="1.5" step="0.1" value="0.5" onchange="updateParticles()">
-          </div>
-        </div>
+      <div class="info-value">
+       Nasir Hacker
       </div>
-    </div>
-  </div>
-
-  <!-- Owner Info Modal - FIXED: scrollable, close button always visible -->
-  <div class="modal-overlay" id="ownerModal">
-    <div class="modal-card">
-      <div class="modal-close" id="closeModal">✕</div>
-      <h2 class="modal-title">Owner Information</h2>
-      <div class="owner-info">
-        <div class="info-row"><div class="info-label">👤 Name:</div><div class="info-value">Nasir Hacker</div></div>
-        <div class="info-row">
-          <div class="info-label">💼 Profession:</div>
-          <div class="info-value">
-            <ul class="profession-list">
-              <li>Cybersecurity Expert</li>
-              <li>Ethical Hacker</li>
-              <li>Automation Developer</li>
-              <li>Bot Developer (Telegram, WhatsApp)</li>
-            </ul>
-          </div>
-        </div>
-        <div class="info-row">
-          <div class="info-label">📱 WhatsApp:</div>
-          <div class="info-value">
-            <a href="https://wa.me/923057175014?text=👋%20Hi%20Nasir!%20I%20saw%20your%20Nasir%20DB%20tool..." target="_blank" class="whatsapp-number">
-              <svg viewBox="0 0 24 24" width="16" height="16">
-                <path d="M19.077 4.928C17.191 3.041 14.683 2 12.006 2 6.798 2 2.548 6.193 2.54 11.393c-.003 1.747.456 3.457 1.328 4.985L2.25 21.75l5.433-1.566c1.494.832 3.175 1.274 4.902 1.276h.004c5.192 0 9.444-4.194 9.452-9.394.004-2.512-1.01-4.872-2.914-6.758zM12.025 20.031h-.003c-1.488 0-2.944-.403-4.211-1.159l-.302-.18-3.227.93.992-3.146-.174-.31a8.416 8.416 0 0 1-1.288-4.468c.008-4.656 3.794-8.438 8.46-8.438 2.256 0 4.377.88 5.973 2.478 1.592 1.594 2.467 3.713 2.463 5.966-.008 4.656-3.795 8.437-8.463 8.437zM16.293 14.1c-.242-.121-1.432-.706-1.654-.787-.222-.08-.383-.121-.544.121-.161.242-.625.787-.766.948-.141.161-.282.181-.524.06-.868-.404-1.584-1.113-2.165-1.92-.163-.242-.017-.373.115-.578.094-.145.213-.316.284-.476.081-.16.041-.302-.02-.424-.061-.121-.544-1.311-.746-1.796-.196-.472-.396-.404-.544-.414-.142-.01-.302-.01-.462-.01s-.423.06-.644.302c-.221.242-.847.827-.847 2.018 0 1.19.867 2.341.989 2.502.121.161 1.673 2.663 4.134 3.631.576.222 1.032.358 1.386.46.586.168 1.12.144 1.543.088.473-.064 1.456-.595 1.662-1.17.206-.575.206-1.069.144-1.17-.061-.101-.222-.161-.464-.283z"/>
-              </svg>
-              +92 305 7175014
-            </a>
-          </div>
-        </div>
-        <div class="info-row"><div class="info-label">🎂 Age:</div><div class="info-value">20 Years</div></div>
-        <div class="info-row"><div class="info-label">📍 City:</div><div class="info-value">Bhakkar, Punjab, Pakistan</div></div>
-        <div class="info-row"><div class="info-label">📚 Education:</div><div class="info-value">Student of BSCS</div></div>
+     </div> 
+     <div class="info-row"> 
+      <div class="info-label">
+       💼 Profession:
+      </div> 
+      <div class="info-value"> 
+       <ul class="profession-list"> 
+        <li>Cybersecurity Expert</li> 
+        <li>Ethical Hacker</li> 
+        <li>Automation Developer</li> 
+        <li>Bot Developer (Telegram, WhatsApp)</li> 
+       </ul> 
+      </div> 
+     </div> 
+     <div class="info-row"> 
+      <div class="info-label">
+       📱 WhatsApp:
+      </div> 
+      <div class="info-value"> <a href="https://wa.me/923057175014?text=👋%20Hi%20Nasir!%20I%20saw%20your%20Nasir%20DB%20tool..." target="_blank" class="whatsapp-number"> 
+        <svg viewbox="0 0 24 24" width="16" height="16"> <path d="M19.077 4.928C17.191 3.041 14.683 2 12.006 2 6.798 2 2.548 6.193 2.54 11.393c-.003 1.747.456 3.457 1.328 4.985L2.25 21.75l5.433-1.566c1.494.832 3.175 1.274 4.902 1.276h.004c5.192 0 9.444-4.194 9.452-9.394.004-2.512-1.01-4.872-2.914-6.758zM12.025 20.031h-.003c-1.488 0-2.944-.403-4.211-1.159l-.302-.18-3.227.93.992-3.146-.174-.31a8.416 8.416 0 0 1-1.288-4.468c.008-4.656 3.794-8.438 8.46-8.438 2.256 0 4.377.88 5.973 2.478 1.592 1.594 2.467 3.713 2.463 5.966-.008 4.656-3.795 8.437-8.463 8.437zM16.293 14.1c-.242-.121-1.432-.706-1.654-.787-.222-.08-.383-.121-.544.121-.161.242-.625.787-.766.948-.141.161-.282.181-.524.06-.868-.404-1.584-1.113-2.165-1.92-.163-.242-.017-.373.115-.578.094-.145.213-.316.284-.476.081-.16.041-.302-.02-.424-.061-.121-.544-1.311-.746-1.796-.196-.472-.396-.404-.544-.414-.142-.01-.302-.01-.462-.01s-.423.06-.644.302c-.221.242-.847.827-.847 2.018 0 1.19.867 2.341.989 2.502.121.161 1.673 2.663 4.134 3.631.576.222 1.032.358 1.386.46.586.168 1.12.144 1.543.088.473-.064 1.456-.595 1.662-1.17.206-.575.206-1.069.144-1.17-.061-.101-.222-.161-.464-.283z" /> 
+        </svg> +92 305 7175014 </a> 
+      </div> 
+     </div> 
+     <div class="info-row">
+      <div class="info-label">
+       🎂 Age:
       </div>
-    </div>
-  </div>
-
-  <!-- Main Content Box -->
-  <div class="box">
-    <h2>NASIR HACKER DB</h2>
-    
-    <!-- Feature 2: Search History -->
-    <div class="history-container" id="historyContainer"></div>
-    
-    <!-- Input with clear button - FIXED: cross at right edge -->
-    <div class="input-container">
-      <input type="text" id="number" placeholder="Enter phone or CNIC" autocomplete="off">
-      <button class="clear-input" id="clearInputBtn" onclick="clearInput()">✕</button>
-    </div>
-    <!-- Input hint -->
-    <div class="input-hint" id="inputHint">📱 Example: 3057175014 or 1234512345678</div>
-
-    <button class="primary-btn" id="fetchBtn" onclick="fetchData()">🔎 Get Details</button>
-    <div id="responseBox"></div>
-    <div style="display: flex; gap: 10px; margin-top: 10px;">
-      <button id="shareButton" class="whatsapp-btn" onclick="shareWhatsApp()" style="display: none; flex:1;">📲 Share</button>
-      <button id="copyButton" class="copy-btn" onclick="copyToClipboard()" style="display: none; flex:1;">📋 Copy</button>
-    </div>
-    <button class="telegram-btn" onclick="window.open('https://t.me/TrustedHacker079', '_blank')">✈️ Join Telegram Channel</button>
-    
-    <!-- Last updated & footer (Best Copy removed) -->
-    <div class="last-updated" id="lastUpdated"></div>
-    <div class="app-footer">
-      <div class="footer-main">
-        <span class="copyright">© 2026 Nasir Hacker</span>
+      <div class="info-value">
+       20 Years
       </div>
-      <span class="disclaimer" id="disclaimer">📌 Data for educational purposes only. Respect privacy.</span>
-    </div>
-  </div>
-
-  <!-- Telegram Popup -->
-  <div id="popupOverlay">
-    <div>
-      <h3>Join our Telegram Channel?</h3>
-      <button class="join-btn" onclick="joinTelegram()">Join Telegram</button>
-      <button class="cancel-btn" onclick="closePopup()">Cancel</button>
-    </div>
-  </div>
-
+     </div> 
+     <div class="info-row">
+      <div class="info-label">
+       📍 City:
+      </div>
+      <div class="info-value">
+       Bhakkar, Punjab, Pakistan
+      </div>
+     </div> 
+     <div class="info-row">
+      <div class="info-label">
+       📚 Education:
+      </div>
+      <div class="info-value">
+       Student of BSCS
+      </div>
+     </div> 
+    </div> 
+   </div> 
+  </div> <!-- Main Content Box --> 
+  <div class="box"> 
+   <h2>NASIR HACKER DB</h2> <!-- Feature 2: Search History --> 
+   <div class="history-container" id="historyContainer"></div> <!-- Input with clear button - FIXED: cross at right edge --> 
+   <div class="input-container"> 
+    <input type="text" id="number" placeholder="Enter phone or CNIC" autocomplete="off"> <button class="clear-input" id="clearInputBtn" onclick="clearInput()">✕</button> 
+   </div> <!-- Input hint --> 
+   <div class="input-hint" id="inputHint">
+    📱 Example: 3057175014 or 1234512345678
+   </div> <button class="primary-btn" id="fetchBtn" onclick="fetchData()">🔎 Get Details</button> 
+   <div id="responseBox"></div> 
+   <div style="display: flex; gap: 10px; margin-top: 10px;"> <button id="shareButton" class="whatsapp-btn" onclick="shareWhatsApp()" style="display: none; flex:1;">📲 Share</button> <button id="copyButton" class="copy-btn" onclick="copyToClipboard()" style="display: none; flex:1;">📋 Copy</button> 
+   </div> <button class="telegram-btn" onclick="window.open('https://t.me/TrustedHacker079', '_blank')">✈️ Join Telegram Channel</button> <!-- Last updated & footer (Best Copy removed) --> 
+   <div class="last-updated" id="lastUpdated"></div> 
+   <div class="app-footer"> 
+    <div class="footer-main"> <span class="copyright">© 2026 Nasir Hacker</span> 
+    </div> <span class="disclaimer" id="disclaimer">📌 Data for educational purposes only. Respect privacy.</span> 
+   </div> 
+  </div> <!-- Telegram Popup --> 
+  <div id="popupOverlay"> 
+   <div> 
+    <h3>Join our Telegram Channel?</h3> <button class="join-btn" onclick="joinTelegram()">Join Telegram</button> <button class="cancel-btn" onclick="closePopup()">Cancel</button> 
+   </div> 
+  </div> 
   <script>
     // ========== GLOBAL VARIABLES ==========
     let fetchingInterval = null;
@@ -1054,7 +1036,7 @@
       document.getElementById('responseBox').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
-    // ========== MAIN FETCH FUNCTION ==========
+    // ========== MAIN FETCH FUNCTION WITH NEW API ==========
     window.fetchData = async function() {
       const number = document.getElementById("number").value.trim();
       const responseBox = document.getElementById("responseBox");
@@ -1101,42 +1083,57 @@
         return;
       }
 
+      // NEW API URL - REPLACED
       const queryParam = searchedNumber || searchedCNIC;
-      const apiUrl = `https://fam-official.serv00.net/api/database.php?number=${encodeURIComponent(queryParam)}`;
+      const apiUrl = `https://amscript.xyz/PublicApi/Siminfo.php?number=${encodeURIComponent(queryParam)}`;
       
       try {
-        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(apiUrl)}`;
-        const res = await fetch(proxyUrl);
-        const text = await res.text();
-        if (text.trim().startsWith('<')) throw new Error('Server returned HTML');
+        // Try direct fetch first (might work if CORS is enabled)
         let data;
-        try { data = JSON.parse(text); } catch (e) {
-          if (text.includes("Too Many Requests")) {
-            const fallbackProxy = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(apiUrl)}`;
-            const fallbackRes = await fetch(fallbackProxy);
-            const fallbackText = await fallbackRes.text();
-            if (fallbackText.trim().startsWith('<')) throw new Error('Proxy error');
-            data = JSON.parse(fallbackText);
-          } else throw new Error('Invalid JSON');
+        try {
+          const response = await fetch(apiUrl);
+          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+          const text = await response.text();
+          if (text.trim().startsWith('<')) throw new Error('Server returned HTML');
+          data = JSON.parse(text);
+        } catch (directError) {
+          console.log("Direct fetch failed, trying proxy:", directError);
+          // Fallback to proxy if direct fetch fails
+          const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(apiUrl)}`;
+          const proxyResponse = await fetch(proxyUrl);
+          const proxyText = await proxyResponse.text();
+          if (proxyText.trim().startsWith('<')) throw new Error('Proxy returned HTML');
+          data = JSON.parse(proxyText);
         }
+
         stopFetchingAnimation();
 
-        if (data && data.success === true && data.data && Array.isArray(data.data.records)) {
-          const records = data.data.records;
+        // Check response structure for new API
+        if (data && data.success === true && Array.isArray(data.data)) {
+          const records = data.data;
           if (records.length === 0) {
             responseBox.innerHTML = `<p style="color: #FFD700; font-size: 16px; font-weight: bold;">${lang[currentLanguage].noRecords}</p>`;
             return;
           }
           
           const checkedTime = new Date().toLocaleString('en-PK', { hour: '2-digit', minute: '2-digit', second: '2-digit', day: '2-digit', month: 'short' }) + ' PKT';
-          const uniqueRecords = records.filter((rec, idx, self) => idx === self.findIndex(r => r.phone === rec.phone && r.cnic === rec.cnic));
+          
+          // Remove duplicates based on phone + cnic
+          const uniqueRecords = records.filter((rec, idx, self) => 
+            idx === self.findIndex(r => r.phone === rec.phone && r.cnic === rec.cnic)
+          );
 
           let content = `🔍 SIM DATA FOUND\n📊 Total Records: ${uniqueRecords.length}\n\n`;
           uniqueRecords.forEach((rec, index) => {
             const name = (rec.full_name && rec.full_name !== "None" && rec.full_name !== "null") ? rec.full_name : "N/A";
             const address = (rec.address && rec.address !== "None" && rec.address !== "null" && rec.address !== "") ? rec.address : "Not Available";
+            
             if (uniqueRecords.length > 1) content += `Record ${index + 1} of ${uniqueRecords.length}\n`;
-            content += `👤 Name: ${name}\n🆔 CNIC: ${rec.cnic || "N/A"}\n📞 Mobile: ${rec.phone || "N/A"}\n`;
+            content += `👤 Name: ${name}\n`;
+            content += `🆔 CNIC: ${rec.cnic || "N/A"}\n`;
+            content += `📞 Mobile: ${rec.phone || "N/A"}\n`;
+            content += `📍 Address: ${address}\n`;
+            
             if (index < uniqueRecords.length - 1) content += `─────────────────\n\n`;
           });
           content += `\n📅 Checked: ${checkedTime}\n🚀 POWERED BY NASIR HACKER`;
@@ -1154,6 +1151,7 @@
       } catch (error) {
         stopFetchingAnimation();
         responseBox.innerHTML = `<p style="color: red; font-size: 16px; font-weight: bold;">${lang[currentLanguage].error}<br><small>${error.message}</small></p>`;
+        console.error("Fetch error:", error);
       }
     };
 
@@ -1176,6 +1174,6 @@
     applyLanguage();
     document.getElementById('soundSlider').classList.toggle('active', soundEnabled);
     setTimeout(() => { document.getElementById("popupOverlay").style.display = "flex"; }, 10000);
-  </script>
-</body>
+  </script> 
+ </body>
 </html>
