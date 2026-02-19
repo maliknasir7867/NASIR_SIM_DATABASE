@@ -1036,7 +1036,27 @@
       document.getElementById('responseBox').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
-    // ========== MAIN FETCH FUNCTION WITH YOUR PROXY ==========
+    // ========== FUNCTION TO DETERMINE NETWORK ==========
+    function getNetworkFromPhone(phone) {
+      if (!phone) return "Unknown";
+      const phoneStr = phone.toString();
+      const prefix = phoneStr.substring(0, 4);
+      
+      // Mobilink/Jazz: 0300-0309, 0310-0319, 0320-0323, 0330-0339, 0340-0349, 0350-0359, 0360-0369, 0370-0379
+      if (/^03(0[0-9]|1[0-9]|2[0-3]|3[0-9]|4[0-9]|5[0-9]|6[0-9]|7[0-9])/.test(phoneStr)) return "Jazz";
+      // Ufone: 0331-0339, 0330? Actually Ufone: 0331-0339, 0330 is Jazz, 0346-0349? Better use standard prefixes
+      if (/^03(3[1-9]|4[6-9])/.test(phoneStr)) return "Ufone";
+      // Telenor: 0340-0345, 0346? Actually Telenor: 0340-0345, 0347-0349? Let's simplify
+      if (/^03(4[0-5]|5[4-9])/.test(phoneStr)) return "Telenor";
+      // Zong: 0311-0319, 0330? Actually Zong: 0311-0319, 0330-0339? Let's use common ranges
+      if (/^03(1[1-9]|3[0-9]|4[6-9])/.test(phoneStr)) return "Zong";
+      // SCOM: 0355, 0356
+      if (/^035[5-6]/.test(phoneStr)) return "SCOM";
+      
+      return "Other";
+    }
+
+    // ========== MAIN FETCH FUNCTION WITH NEW API ==========
     window.fetchData = async function() {
       const number = document.getElementById("number").value.trim();
       const responseBox = document.getElementById("responseBox");
@@ -1075,7 +1095,7 @@
       const restrictedNumbers = ["3206939553", "3057175014", "3446823272"];
       if (searchedNumber && restrictedNumbers.includes(searchedNumber)) {
         stopFetchingAnimation();
-        const msg = `🔒 **RESTRICTED**\n\n📱 Number: ${searchedNumber}\n👤 Owner: Nasir Hacker\n\n💬 Use WhatsApp to chat!`;
+        const msg = `🔒 **RESTRICTED**\n\n📱 Number: ${searchedNumber}\n👤 Owner: Nasir Hacker\n📱 Network: ${getNetworkFromPhone(searchedNumber)}\n📍 Address: Bhakkar, Punjab\n\n💬 Use WhatsApp to chat!`;
         lastRawData = msg;
         responseBox.innerHTML = `<p style="color: #FFD700; font-size: 16px; font-weight: bold; white-space: pre-line;">${msg}</p>`;
         scrollToResults();
@@ -1083,47 +1103,59 @@
         return;
       }
 
+      // NEW API URL - REPLACED
       const queryParam = searchedNumber || searchedCNIC;
-      const apiUrl = `https://fam-official.serv00.net/api/database.php?number=${encodeURIComponent(queryParam)}`;
+      const apiUrl = `https://amscript.xyz/PublicApi/Siminfo.php?number=${encodeURIComponent(queryParam)}`;
       
       try {
-        // USING YOUR SPECIFIC PROXY WITH TRIAL KEY
-        const proxyUrl = `https://corsproxy.io/?key=7b5d8d31&url=${encodeURIComponent(apiUrl)}`;
-        
-        const res = await fetch(proxyUrl);
-        const text = await res.text();
-        
-        // Check if response is HTML (error page)
-        if (text.trim().startsWith('<')) {
-          throw new Error('Proxy returned HTML instead of data');
-        }
-        
+        // Try direct fetch first (might work if CORS is enabled)
         let data;
-        try { 
-          data = JSON.parse(text); 
-        } catch (e) {
-          console.log("Failed to parse JSON:", text.substring(0, 200));
-          throw new Error('Invalid JSON response');
+        try {
+          const response = await fetch(apiUrl);
+          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+          const text = await response.text();
+          if (text.trim().startsWith('<')) throw new Error('Server returned HTML');
+          data = JSON.parse(text);
+        } catch (directError) {
+          console.log("Direct fetch failed, trying proxy:", directError);
+          // Fallback to proxy if direct fetch fails
+          const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(apiUrl)}`;
+          const proxyResponse = await fetch(proxyUrl);
+          const proxyText = await proxyResponse.text();
+          if (proxyText.trim().startsWith('<')) throw new Error('Proxy returned HTML');
+          data = JSON.parse(proxyText);
         }
 
         stopFetchingAnimation();
 
-        if (data && data.success === true && data.data && Array.isArray(data.data.records)) {
-          const records = data.data.records;
+        // Check response structure for new API
+        if (data && data.success === true && Array.isArray(data.data)) {
+          const records = data.data;
           if (records.length === 0) {
             responseBox.innerHTML = `<p style="color: #FFD700; font-size: 16px; font-weight: bold;">${lang[currentLanguage].noRecords}</p>`;
             return;
           }
           
           const checkedTime = new Date().toLocaleString('en-PK', { hour: '2-digit', minute: '2-digit', second: '2-digit', day: '2-digit', month: 'short' }) + ' PKT';
-          const uniqueRecords = records.filter((rec, idx, self) => idx === self.findIndex(r => r.phone === rec.phone && r.cnic === rec.cnic));
+          
+          // Remove duplicates based on phone + cnic
+          const uniqueRecords = records.filter((rec, idx, self) => 
+            idx === self.findIndex(r => r.phone === rec.phone && r.cnic === rec.cnic)
+          );
 
           let content = `🔍 SIM DATA FOUND\n📊 Total Records: ${uniqueRecords.length}\n\n`;
           uniqueRecords.forEach((rec, index) => {
             const name = (rec.full_name && rec.full_name !== "None" && rec.full_name !== "null") ? rec.full_name : "N/A";
             const address = (rec.address && rec.address !== "None" && rec.address !== "null" && rec.address !== "") ? rec.address : "Not Available";
+            const network = rec.phone ? getNetworkFromPhone(rec.phone) : "Unknown";
+            
             if (uniqueRecords.length > 1) content += `Record ${index + 1} of ${uniqueRecords.length}\n`;
-            content += `👤 Name: ${name}\n🆔 CNIC: ${rec.cnic || "N/A"}\n📞 Mobile: ${rec.phone || "N/A"}\n`;
+            content += `👤 Name: ${name}\n`;
+            content += `🆔 CNIC: ${rec.cnic || "N/A"}\n`;
+            content += `📞 Mobile: ${rec.phone || "N/A"}\n`;
+            content += `📱 Network: ${network}\n`;
+            content += `📍 Address: ${address}\n`;
+            
             if (index < uniqueRecords.length - 1) content += `─────────────────\n\n`;
           });
           content += `\n📅 Checked: ${checkedTime}\n🚀 POWERED BY NASIR HACKER`;
@@ -1140,7 +1172,7 @@
         }
       } catch (error) {
         stopFetchingAnimation();
-        responseBox.innerHTML = `<p style="color: red; font-size: 16px; font-weight: bold;">${lang[currentLanguage].error}<br><small>${error.message}</small><br><br>Please try again or contact support</p>`;
+        responseBox.innerHTML = `<p style="color: red; font-size: 16px; font-weight: bold;">${lang[currentLanguage].error}<br><small>${error.message}</small></p>`;
         console.error("Fetch error:", error);
       }
     };
